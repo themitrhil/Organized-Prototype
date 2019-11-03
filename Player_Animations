@@ -45,12 +45,5 @@ public class Player_Animations : MonoBehaviour
         }
         
     }
-    void LateUpdate()
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            walk_back_current -= 0.1f * Time.deltaTime;
-            animation.SetFloat("Speedv", walk_back_current);
-        }
-    }
+   
 }
