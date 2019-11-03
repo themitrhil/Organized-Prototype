@@ -4,7 +4,7 @@ public class Player_Animations : MonoBehaviour
 {
     private Animator animation;
     public static bool canRun;
-    public float walk_current, walk_back_current, sprint_current;
+    public float walk_current, sprint_current;
     private float velocyt;
     public bool isRunning;
     void Awake()
