@@ -1,0 +1,56 @@
+using UnityEngine;
+
+public class Player_Animations : MonoBehaviour
+{
+    private Animator animation;
+    public static bool canRun;
+    public float walk_current, walk_back_current, sprint_current;
+    private float velocyt;
+    public bool isRunning;
+    void Awake()
+    {
+        animation = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) && canRun)
+        {
+            isRunning = true;
+            sprint_current = Mathf.SmoothDamp(sprint_current, 2, ref velocyt, 0.1f);
+            sprint_current = Mathf.Clamp(sprint_current, 1f, 2f);
+            animation.SetFloat("Speedv", sprint_current);
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            sprint_current = 1f;
+        }
+        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+        {
+            canRun = true;
+            animation.SetFloat("Speedv", walk_current);
+            walk_current = Mathf.SmoothDamp(walk_current, 1f, ref velocyt, 0.1f);
+            walk_current = Mathf.Clamp(walk_current, 0f, 1f);
+            Player_Controller.Player_Speed = Mathf.SmoothDamp(Player_Controller.Player_Speed, 1.5f, ref velocyt, 0.1f);
+            Player_Controller.Player_Speed = Mathf.Clamp(Player_Controller.Player_Speed, 0, 1.5f);
+        }
+        else
+        {
+            sprint_current = 1f;
+            Player_Controller.Player_Speed = 0f;
+            canRun = false;
+            animation.SetFloat("Speedv", walk_current);
+            walk_current -= 3.5f * Time.deltaTime;
+            walk_current = Mathf.Clamp(walk_current, 0, 1);
+        }
+        
+    }
+    void LateUpdate()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            walk_back_current -= 0.1f * Time.deltaTime;
+            animation.SetFloat("Speedv", walk_back_current);
+        }
+    }
+}
