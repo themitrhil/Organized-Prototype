@@ -1,0 +1,176 @@
+using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
+using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+
+public class Network : MonoBehaviourPunCallbacks 
+{
+
+    [Header("Game Object")]
+    public GameObject Entrar;
+    public GameObject Sair;
+    public GameObject Lobby;
+    public GameObject Latency;
+    public GameObject Jogar;
+    public GameObject UserList;
+
+    [Header("Text")]
+    public Text current;
+    public Text nickname;
+    public Text ping;
+    public Text room_name;
+    public Text player_count;
+    public Text room_joined;
+
+    [Header("PlayerList")]
+    public Text[] PlayerNames = new Text[5];
+
+
+    void Start()
+    {
+        Lobby.SetActive(false);
+        PhotonNetwork.NickName = null;
+    }
+
+    void Update()
+    {
+        PlayerList();
+
+
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        ping.text = PhotonNetwork.GetPing().ToString() + "ms";
+        if(PhotonNetwork.GetPing() >= 100)
+        {
+            ping.color = Color.yellow;
+        }
+        if (PhotonNetwork.GetPing() <= 100)
+        {
+            ping.color = Color.green;
+        }
+
+        if(PhotonNetwork.IsConnectedAndReady == true) { Latency.SetActive(true); } else { Latency.SetActive(false); }
+        player_count.text = "Players: " + PhotonNetwork.CurrentRoom.PlayerCount.ToString();
+
+        Debug.Log(PhotonNetwork.PlayerList[0].NickName);
+    }
+
+    public void Connect()
+    {
+        if (nickname.text != "")
+        {
+            PhotonNetwork.NickName = nickname.text;
+            PhotonNetwork.ConnectUsingSettings();
+            current.text = "Conectando...";
+            Entrar.SetActive(false);
+        }
+        else
+        {
+            current.text = "Insira um Nome!";
+        }
+        
+    }
+
+    public void Disconnect()
+    {
+        PhotonNetwork.NickName = null;
+        PhotonNetwork.Disconnect();
+        current.text = "Desconectando...";
+        Sair.SetActive(false);
+    }
+
+    public void CriarSala()
+    {
+        PhotonNetwork.CreateRoom("Room #" + Random.Range(0,9999));
+    }
+
+    public void EntrarSala()
+    {
+        PhotonNetwork.JoinRandomRoom();
+        room_joined.text = PhotonNetwork.CurrentRoom.ToString();
+        UserList.SetActive(true);
+    }
+
+    public void SairSala()
+    {
+        PhotonNetwork.LeaveRoom();
+        Jogar.SetActive(false);
+        UserList.SetActive(false);
+    }
+
+    public void IniciarJogo()
+    {
+        PhotonNetwork.LoadLevel("SampleScene");
+    }
+
+    public void PlayerList()
+    {
+        PlayerNames[0].text = PhotonNetwork.PlayerList[0].NickName;
+        PlayerNames[1].text = PhotonNetwork.PlayerList[1].NickName;
+        PlayerNames[2].text = PhotonNetwork.PlayerList[2].NickName;
+        PlayerNames[3].text = PhotonNetwork.PlayerList[3].NickName;
+        PlayerNames[4].text = PhotonNetwork.PlayerList[4].NickName;
+    }
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        base.OnDisconnected(cause);
+        current.text = "Desconectado!";
+        Lobby.SetActive(false);
+        Entrar.SetActive(true);
+    }
+
+    public override void OnConnectedToMaster()
+    {
+        current.text = "Conectado!";
+        PhotonNetwork.JoinLobby();
+        Lobby.SetActive(true);
+        Sair.SetActive(true);
+    }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("inside lobby");
+    }
+
+    public override void OnCreatedRoom()
+    {
+        Debug.Log("Sala Criada!");
+        room_name.text = PhotonNetwork.CurrentRoom.Name.ToString();
+    }
+
+    public override void OnJoinedRoom()
+    {
+        Debug.Log("Entrou na Sala!");
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Jogar.SetActive(true);
+        }
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        base.OnJoinRandomFailed(returnCode, message);
+    }
+
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        base.OnCreateRoomFailed(returnCode, message);
+    }
+
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        base.OnJoinRoomFailed(returnCode, message);
+    }
+
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        Jogar.SetActive(false);
+        room_name.text = "";
+        room_joined.text = "";
+    }
+
+
+}
